@@ -1,0 +1,68 @@
+---
+- hosts: all
+  tasks:
+    
+  - name: Installing packages
+    yum: 
+      state=installed name={{ item }}
+    with_items:
+      # Linux Operating System Requirements: http://docs.oracle.com/cd/E23104_01/sysreqs1221/sysrs.htm#BABJBCAI
+      - compat-libcap1
+      - compat-libstdc++-33.x86_64
+      - compat-libstdc++-33.i686
+      - gcc
+      - gcc-c++
+      - glibc.i686
+      - glibc-devel.x86_64
+      - libaio-devel.x86_64
+      - libstdc++-devel.x86_64
+      - ksh
+      - sysstat
+      - dos2unix
+      - dejavu-sans-fonts
+      # We need these libraries in order to execute X clients
+      - xorg-x11-utils
+      - xorg-x11-apps
+      - xorg-x11-xauth
+      # Helper libraries in order to execute X clients
+      - gtk2
+      - rng-tools	  
+      - nano	  
+      - mesa-dri-drivers
+      - zip
+      - unzip
+    become: true
+
+  - name: Enabling rngd
+    service:
+      name: rngd
+      state: started
+      enabled: yes	  
+    become: true
+
+  - name: Extracting JDK
+    unarchive: src="/mnt/12.2.1.3.0/jdk-8u152-linux-x64.tar.gz" dest="/opt" remote_src=yes creates="/opt/jdk1.8.0_152/bin/java"
+    become: true
+
+  - name: Converting EOL files from DOS to UNIX
+    command: find /vagrant/scripts -name "*" -exec /usr/bin/dos2unix {} \;
+
+  - name: Copying bash_profile
+    copy: src=/vagrant/scripts/.bash_profile dest=/home/vagrant/.bash_profile mode="u=rw,g=r,o=r"
+
+  - name: Creating /u01 directory
+    file: path=/u01 state=directory owner=vagrant group=vagrant
+    become: true
+
+  - name: Creating Oracle Inventory
+    command: /vagrant/scripts/createCentralInventory.sh
+    args:
+      creates: /etc/oraInst.loc
+    become: true
+
+  - name: Oracle FMW (12.2.1.2.0) - Infraestructure
+    shell: java -jar /mnt/12.2.1.3.0/fmw_12.2.1.3.0_infrastructure.jar -silent -responseFile /vagrant/scripts/infraestructure.resp
+    args:
+      creates: /u01/oracle/product/fmw/inventory/registry.xml
+
+

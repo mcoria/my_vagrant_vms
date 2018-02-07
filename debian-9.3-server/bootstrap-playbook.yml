@@ -1,0 +1,12 @@
+---
+- hosts: all
+  tasks:
+  - name: Install docker
+    shell: curl -fsSL get.docker.com | sudo sh
+    args:
+        creates: /usr/bin/docker
+  - name: Adding mauricio to docker group
+    user: name=mauricio groups=docker append=yes
+    become: true
+
+#https://www.tecmint.com/apt-cache-server-in-ubuntu/
