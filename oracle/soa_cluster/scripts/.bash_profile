@@ -7,7 +7,7 @@ fi
 
 # User specific environment and startup programs
 
-JAVA_HOME=/opt/jdk1.8.0_152
+JAVA_HOME=/opt/jdk_latest
 export JAVA_HOME
 
 #ORACLE_HOME=/home/vagrant/Oracle/Middleware/Oracle_Home
