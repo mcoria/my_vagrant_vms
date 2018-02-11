@@ -1,0 +1,7 @@
+---
+- hosts: all
+  tasks:
+
+  - name: Creating /u02 directory
+    file: path=/u02 state=directory owner=vagrant group=vagrant
+    become: true

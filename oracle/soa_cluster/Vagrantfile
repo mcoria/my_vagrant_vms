@@ -4,6 +4,10 @@ Vagrant.configure("2") do |config|
 
   config.vm.define :soa1 do |soa1|
 	soa1.vm.network "private_network", ip: "192.168.40.150"
+	
+	soa1.vm.provision "ansible_local" do |ansible|
+		ansible.playbook = "playbook-soa1.yml"
+	end	
   end    
 
   config.vm.define :soa1 do |soa2|

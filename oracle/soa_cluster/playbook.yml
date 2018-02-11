@@ -69,3 +69,7 @@
     command: /opt/jdk_latest/bin/java -jar /mnt/12.2.1.3.0/fmw_12.2.1.3.0_infrastructure.jar -silent -responseFile /vagrant/scripts/fmw_infraestructure.resp
     args:
       creates: /u01/oracle/product/fmw
+      
+  - name: Updtaing /etc/hosts
+    copy: src=/vagrant/scripts/hosts dest=/etc/hosts remote_src=yes
+    become: true
