@@ -1,0 +1,19 @@
+---
+- hosts: all
+  tasks:
+
+  - name: Creating /u02 directory
+    file: path=/u02 state=directory owner=vagrant group=vagrant
+    become: true
+
+  - name: Copying ifcfg-ens33
+    copy: src=/vagrant/scripts/ifcfg-ens33-soa2 dest=/etc/sysconfig/network-scripts/ifcfg-ens33 owner=root group=root mode=0644 remote_src=yes
+    become: true
+
+  - name: Setting hostname
+    hostname: name=soavh02
+    become: true
+
+  - name: Reloading network service
+    service: name=network state=restarted
+    become: true    

@@ -6,7 +6,6 @@ Vagrant.configure("2") do |config|
 
   config.vm.define :soa1 do |soa1|
 	soa1.vm.network "private_network", auto_config: false
-	
 	soa1.vm.provision "ansible_local" do |ansible|
 		ansible.playbook = "playbook-soa1.yml"
 	end	
@@ -14,6 +13,9 @@ Vagrant.configure("2") do |config|
 
   config.vm.define :soa2 do |soa2|
 	soa2.vm.network "private_network", auto_config: false
+	soa2.vm.provision "ansible_local" do |ansible|
+		ansible.playbook = "playbook-soa2.yml"
+	end		
   end
 
   config.vm.synced_folder "D:/Download/Oracle/soa_bpm/12.2.1.3.0/vagrant_installers", "/mnt/12.2.1.3.0"
