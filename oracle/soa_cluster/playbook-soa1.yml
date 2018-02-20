@@ -14,6 +14,14 @@
     hostname: name=soavh01
     become: true
 
+  - name: Updtaing /etc/samba/smb.conf
+    copy: src=/vagrant/scripts/smb.conf dest=/etc/samba/smb.conf mode="u=rw,g=r,o=r"
+    become: true
+
+  - name: rReloading SMB service
+    systemd: name=smb state=restarted enabled=true
+    become: true
+
   - name: Reloading network service
-    service: name=network state=restarted
-    become: true    
+    systemd: name=network state=restarted
+    become: true
