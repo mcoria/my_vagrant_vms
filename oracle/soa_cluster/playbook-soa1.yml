@@ -18,7 +18,7 @@
     copy: src=/vagrant/scripts/smb.conf dest=/etc/samba/smb.conf mode="u=rw,g=r,o=r"
     become: true
 
-  - name: rReloading SMB service
+  - name: Reloading SMB service
     systemd: name=smb state=restarted enabled=true
     become: true
 
