@@ -1,9 +1,7 @@
 ---
 - hosts: all
-  tasks:
-
-  - name: Converting EOL files from DOS to UNIX
-    command: find /vagrant/scripts -name "*" -exec /usr/bin/dos2unix {} \;   
+  become: yes
+  tasks: 
     
   - name: Installing packages
     yum: 
@@ -37,48 +35,55 @@
       - unzip
       - samba 
       - samba-winbind
-    become: true
+
+  - name: Converting EOL files from DOS to UNIX
+    command: find /vagrant/scripts -name "*" -exec /usr/bin/dos2unix {} \;        
 
   - name: Enabling rngd
     service:
       name: rngd
       state: started
       enabled: yes
-    become: true 
     
   - name: Updtaing /etc/hosts
-    copy: src=/vagrant/scripts/hosts dest=/etc/hosts mode="u=rw,g=r,o=r" 
-    become: true
+    copy: src=/vagrant/scripts/hosts dest=/etc/hosts mode="u=rw,g=r,o=r"    
+
+  - name: Creating /u01 directory
+    file: path=/u01 state=directory owner=vagrant group=vagrant
+
+  - name: Creating /u02 directory
+    file: path=/u02 state=directory owner=vagrant group=vagrant    
+
+  - name: Adding user vagrant to SMB
+    shell: test `pdbedit -w -L | awk -F":" '{ print $1 }' | grep 'vagrant$' | wc -l` -eq 1 || echo -ne "vagrant\nvagrant\n" | smbpasswd -s -a vagrant
+
+  - name: Updtaing /etc/samba/smb.conf
+    copy: src=/vagrant/scripts/smb.conf dest=/etc/samba/smb.conf mode="u=rw,g=r,o=r"
+
+  - name: Reloading SMB service
+    systemd: name=smb state=restarted enabled=true
+    
+  # Installing common infrastructure
+  - name: Extracting JDK
+    unarchive: src=/mnt/12.2.1.3.0/jdk-8u152-linux-x64.tar.gz dest=/opt remote_src=yes owner=root group=root creates=/opt/jdk1.8.0_152/bin/java
+
+  - name: Creating JDK sym link
+    file: src=/opt/jdk1.8.0_152 dest=/opt/jdk_latest owner=root group=root state=link
     
   - name: Copying .bash_profile
     copy: src=/vagrant/scripts/.bash_profile dest=/home/vagrant/.bash_profile mode="u=rw,g=r,o=r"
     
   - name: Copying .bashrc
-    copy: src=/vagrant/scripts/.bashrc dest=/home/vagrant/.bashrc mode="u=rw,g=r,o=r"      
-
-  - name: Creating /u01 directory
-    file: path=/u01 state=directory owner=vagrant group=vagrant
-    become: true
-    
-  - name: Extracting JDK
-    unarchive: src=/mnt/12.2.1.3.0/jdk-8u152-linux-x64.tar.gz dest=/opt remote_src=yes owner=root group=root creates=/opt/jdk1.8.0_152/bin/java
-    become: true
-
-  - name: Creating JDK sym link
-    file: src=/opt/jdk1.8.0_152 dest=/opt/jdk_latest owner=root group=root state=link
-    become: true
+    copy: src=/vagrant/scripts/.bashrc dest=/home/vagrant/.bashrc mode="u=rw,g=r,o=r"  
     
   - name: Creating Oracle Inventory
     command: /vagrant/scripts/createCentralInventory.sh
     args:
       creates: /etc/oraInst.loc
-    become: true
 
-  - name: Installing Oracle FMW Infraestructure (12.2.1.3.0)
+  - name: Installing Oracle FMW Infrastructure (12.2.1.3.0)
     command: /opt/jdk_latest/bin/java -jar /mnt/12.2.1.3.0/fmw_12.2.1.3.0_infrastructure.jar -silent -responseFile /vagrant/scripts/fmw_infraestructure.resp
+    become_user: vagrant
     args:
       creates: /u01/oracle/product/fmw
-
-  - name: Adding user vagrant to SMB
-    shell: test `pdbedit -w -L | awk -F":" '{ print $1 }' | grep 'vagrant$' | wc -l` -eq 1 || echo -ne "vagrant\nvagrant\n" | smbpasswd -s -a vagrant
-    become: true
+    

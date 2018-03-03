@@ -1,0 +1,59 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    
+  - name: Installing packages
+    yum: 
+      state=installed name={{ item }}
+    with_items:
+      - yum-utils
+      - device-mapper-persistent-data
+      - lvm2
+      - sysstat
+      - dos2unix
+      - nano
+      - zip
+      - unzip
+      - samba 
+      - samba-winbind
+
+  - name: Converting EOL files from DOS to UNIX
+    command: find /vagrant/scripts -name "*" -exec /usr/bin/dos2unix {} \;
+    
+  - name: Adding Docker repos
+    command: "yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo"
+    args:
+      creates: /etc/yum.repos.d/docker-ce.repo
+    
+  - name: Installing Docker
+    yum: state=installed name=docker-ce
+
+  - name: Adding vagrant to docker group
+    user: name=vagrant groups=docker append=yes
+
+  - name: Enabling docker service
+    systemd:
+     name: docker
+     state: started
+     enabled: true
+    
+  - name: Updtaing /etc/hosts
+    copy: src=/vagrant/scripts/hosts dest=/etc/hosts mode="u=rw,g=r,o=r"
+
+  # Samba y directorios compartidos
+  - name: Creating /u01 directory
+    file: path=/u01 state=directory owner=vagrant group=vagrant
+
+  - name: Creating /u02 directory
+    file: path=/u02 state=directory owner=vagrant group=vagrant    
+
+  - name: Adding user vagrant to SMB
+    shell: test `pdbedit -w -L | awk -F":" '{ print $1 }' | grep 'vagrant$' | wc -l` -eq 1 || echo -ne "vagrant\nvagrant\n" | smbpasswd -s -a vagrant
+
+  - name: Updtaing /etc/samba/smb.conf
+    copy: src=/vagrant/scripts/smb.conf dest=/etc/samba/smb.conf mode="u=rw,g=r,o=r"
+
+  - name: Reloading SMB service
+    systemd: name=smb state=restarted enabled=true
+
