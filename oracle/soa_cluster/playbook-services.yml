@@ -33,10 +33,7 @@
     user: name=vagrant groups=docker append=yes
 
   - name: Enabling docker service
-    systemd:
-     name: docker
-     state: started
-     enabled: true
+    systemd: name=docker state=started enabled=true
     
   - name: Updtaing /etc/hosts
     copy: src=/vagrant/scripts/hosts dest=/etc/hosts mode="u=rw,g=r,o=r"
@@ -57,3 +54,5 @@
   - name: Reloading SMB service
     systemd: name=smb state=restarted enabled=true
 
+  - name: Setting hostname
+    hostname: name=services
