@@ -35,15 +35,14 @@
       - unzip
       - samba 
       - samba-winbind
+      - nfs-utils
+      - lsof
 
   - name: Converting EOL files from DOS to UNIX
     command: find /vagrant/scripts -name "*" -exec /usr/bin/dos2unix {} \;        
 
   - name: Enabling rngd
-    service:
-      name: rngd
-      state: started
-      enabled: yes
+    systemd: name=rngd state=started enabled=yes
     
   - name: Updtaing /etc/hosts
     copy: src=/vagrant/scripts/hosts dest=/etc/hosts mode="u=rw,g=r,o=r"    
@@ -62,6 +61,9 @@
 
   - name: Reloading SMB service
     systemd: name=smb state=restarted enabled=true
+  
+  - name: Mounting NFS /u02 directory
+    mount: fstype=nfs name=/u02 src='services:/var/nfs/u02' state=mounted    
     
   # Installing common infrastructure
   - name: Extracting JDK
