@@ -36,8 +36,8 @@
     copy: src=/vagrant/scripts/hosts dest=/etc/hosts mode="u=rw,g=r,o=r"
 
   # Samba y directorios compartidos
-  - name: Creating /var/nfs/u02 directory
-    file: path=/var/nfs/u02 state=directory owner=vagrant group=vagrant    
+  - name: Creating /var/nfs/u01/oracle/config directory
+    file: path=/var/nfs/u01/oracle/config state=directory owner=vagrant group=vagrant    
 
   - name: Adding user vagrant to SMB
     shell: test `pdbedit -w -L | awk -F":" '{ print $1 }' | grep 'vagrant$' | wc -l` -eq 1 || echo -ne "vagrant\nvagrant\n" | smbpasswd -s -a vagrant
@@ -47,6 +47,9 @@
     
   - name: Updtaing /etc/exports
     copy: src=/vagrant/scripts/exports dest=/etc/exports mode="u=rw,g=r,o=r"
+    
+  - name: Enabling ip_forward
+    sysctl: name=net.ipv4.ip_forward value=1 sysctl_set=yes state=present reload=yes    
     
   - name: Copying ifcfg-ens33
     copy: src=/vagrant/scripts/ifcfg-ens33-services dest=/etc/sysconfig/network-scripts/ifcfg-ens33 owner=root group=root mode=0644 remote_src=yes

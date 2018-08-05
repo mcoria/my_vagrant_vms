@@ -61,9 +61,12 @@
 
   - name: Reloading SMB service
     systemd: name=smb state=restarted enabled=true
-  
-  - name: Mounting NFS /u02 directory
-    mount: fstype=nfs name=/u02 src='services:/var/nfs/u02' state=mounted    
+
+  - name: Creating /u01/oracle/config directory
+    file: path=/u01/oracle/config state=directory owner=vagrant group=vagrant
+    
+  - name: Mounting NFS /u01/config directory
+    mount: fstype=nfs name=/u01/oracle/config src='services:/var/nfs/u01/oracle/config' state=mounted    
     
   # Installing common infrastructure
   - name: Extracting JDK
