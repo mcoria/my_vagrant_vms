@@ -2,13 +2,16 @@
 - hosts: all
   become: true
   tasks:
+  
+  #Este repo lo necesitamos para docker
+  - name: Enabling Yum Repositories
+    command: "yum-config-manager --enable ol7_addons"
     
   - name: Installing packages
     yum: 
       state=installed name={{ item }}
     with_items:
       - yum-utils
-      - device-mapper-persistent-data
       - lvm2
       - sysstat
       - dos2unix
@@ -18,17 +21,10 @@
       - samba 
       - samba-winbind
       - nfs-utils
+      - docker-engine
 
   - name: Converting EOL files from DOS to UNIX
     command: find /vagrant/scripts -name "*" -exec /usr/bin/dos2unix {} \;
-    
-  - name: Adding Docker repos
-    command: "yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo"
-    args:
-      creates: /etc/yum.repos.d/docker-ce.repo
-    
-  - name: Installing Docker
-    yum: state=installed name=docker-ce
 
   - name: Adding vagrant to docker group
     user: name=vagrant groups=docker append=yes
@@ -48,12 +44,21 @@
 
   - name: Updtaing /etc/samba/smb.conf
     copy: src=/vagrant/scripts/smb-services.conf dest=/etc/samba/smb.conf mode="u=rw,g=r,o=r"
+    
+  - name: Updtaing /etc/exports
+    copy: src=/vagrant/scripts/exports dest=/etc/exports mode="u=rw,g=r,o=r"
+    
+  - name: Copying ifcfg-ens33
+    copy: src=/vagrant/scripts/ifcfg-ens33-services dest=/etc/sysconfig/network-scripts/ifcfg-ens33 owner=root group=root mode=0644 remote_src=yes
+
+  - name: Setting hostname
+    hostname: name=services
+
+  - name: Reloading network service
+    systemd: name=network state=restarted    
 
   - name: Reloading SMB service
     systemd: name=smb state=restarted enabled=true
     
   - name: Reloading NFS service
     systemd: name=nfs-server state=restarted enabled=true
-
-  - name: Setting hostname
-    hostname: name=services
