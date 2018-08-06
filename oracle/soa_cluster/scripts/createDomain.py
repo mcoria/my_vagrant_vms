@@ -67,7 +67,6 @@ def createManagedServer(server_name, server_group):
 
 def changeServer(server_name, server_host, server_port, java_arguments):
   cd('/Servers/'+server_name)
-  #set('Machine'      ,'LocalMachine')
   set('ListenAddress',server_host)
   set('ListenPort'   ,server_port)
   
@@ -88,11 +87,13 @@ def createMachine(machine_name, nodemanager_address):
 def assignServerToMachine(server_name, machine_name):  
   cd('/Servers/'+server_name)
   set('Machine',machine_name)
-  
+
 # ----------------------------------------------------
 # Set domain Options
 print('Start...wls domain with template Basic WebLogic Server Domain')
 selectTemplate('Basic WebLogic Server Domain','12.2.1.3.0')
+selectTemplate('Oracle Enterprise Manager','12.2.1.3.0')
+selectTemplate('Oracle WSM Policy Manager','12.2.1.3.0')
 loadTemplates()
 
 cd('/')
@@ -113,10 +114,42 @@ cd('/Security/base_domain/User/weblogic')
 set('Name',ADMIN_USER)
 cmo.setPassword(ADMIN_PASSWORD)
 
+print 'AdminServer configuration'
 changeServer('AdminServer', ADMINHOST_ADDRESS, 7001, ADM_JAVA_ARGUMENTS)
-createMachine('ADMINHOST', ADMINHOST_ADDRESS)
-assignServerToMachine('AdminServer', 'ADMINHOST')
 
+print 'Creating WLS_WSM1'
+createManagedServer('WLS_WSM1', ["WSM-CACHE-SVR" , "WSMPM-MAN-SVR" , "JRF-MAN-SVR"])
+changeServer('WLS_WSM1',SOAHOST1_ADDRESS,8001,WSM_JAVA_ARGUMENTS)
+
+print 'Creating WLS_WSM2'
+createManagedServer('WLS_WSM2', ["WSM-CACHE-SVR" , "WSMPM-MAN-SVR" , "JRF-MAN-SVR"])
+changeServer('WLS_WSM2',SOAHOST2_ADDRESS,8001,WSM_JAVA_ARGUMENTS)
+
+print 'Creating wsm_cluster and assign managed servers'
+cd('/')
+create('wsm_cluser', 'Cluster')
+assign('Server','WLS_WSM1','Cluster','wsm_cluser')
+assign('Server','WLS_WSM2','Cluster','wsm_cluser')
+
+print 'Configure datasources start'
+cd('/JDBCSystemResource/LocalSvcTblDataSource/JdbcResource/LocalSvcTblDataSource/JDBCDriverParams/NO_NAME_0')
+set('URL',SOA_REPOS_DBURL)
+set('PasswordEncrypted',SOA_REPOS_DBPASSWORD)
+cd('Properties/NO_NAME_0/Property/user')
+set('Value',SOA_REPOS_DBUSER_PREFIX+'_STB')
+print 'Executing getDatabaseDefaults().....'
+getDatabaseDefaults() 
+print 'Configure datasources end'
+
+print 'Create Machines'
+createMachine('ADMINHOST', ADMINHOST_ADDRESS)
+createMachine('SOAHOST1', SOAHOST1_ADDRESS)
+createMachine('SOAHOST2', SOAHOST2_ADDRESS)
+
+print 'Create Machines'
+assignServerToMachine('AdminServer', 'ADMINHOST')
+assignServerToMachine('WLS_WSM1', 'SOAHOST1')
+assignServerToMachine('WLS_WSM2', 'SOAHOST2')
 
 print('Write domain...')
 writeDomain(DOMAIN_PATH)
@@ -125,16 +158,12 @@ closeTemplate()
 # ----------------------------------------------------
 #createAdminStartupPropertiesFile(DOMAIN_PATH+'/servers/AdminServer/data/nodemanager',ADM_JAVA_ARGUMENTS)
 createBootPropertiesFile(DOMAIN_PATH+'/servers/AdminServer/security','boot.properties',ADMIN_USER,ADMIN_PASSWORD)
+createBootPropertiesFile(DOMAIN_PATH+'/servers/WLS_WSM1/security','boot.properties',ADMIN_USER,ADMIN_PASSWORD)
 #createBootPropertiesFile(DOMAIN_PATH+'/config/nodemanager','nm_password.properties',ADMIN_USER,ADMIN_PASSWORD)
 
-es = encrypt(ADMIN_PASSWORD,DOMAIN_PATH)
+#es = encrypt(ADMIN_PASSWORD,DOMAIN_PATH)
 
-readDomain(DOMAIN_PATH)
-
-print('Extending domain with infra templates')
-selectTemplate('Oracle Enterprise Manager','12.2.1.3.0')
-selectTemplate('Oracle WSM Policy Manager','12.2.1.3.0')
-loadTemplates()
+#readDomain(DOMAIN_PATH)
 
 #print('Set domain password...') 
 #cd('/SecurityConfiguration/'+DOMAIN)
@@ -143,55 +172,17 @@ loadTemplates()
 #print('Set nodemanager password')
 #set('NodeManagerUsername'         ,ADMIN_USER )
 #set('NodeManagerPasswordEncrypted',es )
-
-print 'Configure datasources start'
-print 'Change datasource LocalScvTblDataSource'
-cd('/JDBCSystemResource/LocalSvcTblDataSource/JdbcResource/LocalSvcTblDataSource/JDBCDriverParams/NO_NAME_0')
-set('URL',SOA_REPOS_DBURL)
-set('PasswordEncrypted',SOA_REPOS_DBPASSWORD)
-cd('Properties/NO_NAME_0/Property/user')
-set('Value',SOA_REPOS_DBUSER_PREFIX+'_STB')
-
-print 'Call getDatabaseDefaults which reads the service table'
-getDatabaseDefaults()    
+   
 
 #changeDatasourceToXA('EDNDataSource')
 #changeDatasourceToXA('wlsbjmsrpDataSource')
 #changeDatasourceToXA('OraSDPMDataSource')
 #changeDatasourceToXA('SOADataSource')
 
-print 'Configure datasources end'
+
+#updateDomain()
+#closeDomain()
 
 
-serverGroup = ["WSM-CACHE-SVR" , "WSMPM-MAN-SVR" , "JRF-MAN-SVR"]
-
-print 'Create WLS_WSM1'
-createManagedServer('WLS_WSM1', serverGroup)
-changeServer('WLS_WSM1',SOAHOST1_ADDRESS,8001,WSM_JAVA_ARGUMENTS)
-
-print 'Create WLS_WSM2'
-createManagedServer('WLS_WSM2', serverGroup)
-changeServer('WLS_WSM2',SOAHOST2_ADDRESS,8001,WSM_JAVA_ARGUMENTS)
-
-print 'Create wsm_cluster'
-cd('/')
-create('wsm_cluser', 'Cluster')
-assign('Server','WLS_WSM1','Cluster','wsm_cluser')
-assign('Server','WLS_WSM2','Cluster','wsm_cluser')
-
-createMachine('SOAHOST1', SOAHOST1_ADDRESS)
-assignServerToMachine('WLS_WSM1', 'SOAHOST1')
-
-createMachine('SOAHOST2', SOAHOST2_ADDRESS)
-assignServerToMachine('WLS_WSM2', 'SOAHOST2')
-
-print 'end server groups'
-
-updateDomain()
-closeDomain()
-
-#createBootPropertiesFile(DOMAIN_PATH+'/servers/wlsm1/security','boot.properties',ADMIN_USER,ADMIN_PASSWORD)
-#createBootPropertiesFile(DOMAIN_PATH+'/servers/wlsm2/security','boot.properties',ADMIN_USER,ADMIN_PASSWORD)
-
-print('Exiting...')
+#print('Exiting...')
 exit()
