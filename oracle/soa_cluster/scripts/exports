@@ -1,0 +1,2 @@
+/var/nfs/u01	192.168.40.0/24(rw,sync,no_root_squash,no_subtree_check)
+
