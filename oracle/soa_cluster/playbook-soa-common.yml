@@ -61,11 +61,8 @@
 
   - name: Reloading SMB service
     systemd: name=smb state=restarted enabled=true
-
-  - name: Creating /u01/oracle/config directory
-    file: path=/u01/oracle/config state=directory owner=vagrant group=vagrant
     
-  - name: Mounting NFS /u01/config directory
+  - name: Mounting NFS /u01/oracle/config directory
     mount: fstype=nfs name=/u01/oracle/config src='services:/var/nfs/u01/oracle/config' state=mounted    
     
   # Installing common infrastructure

@@ -7,7 +7,7 @@ SOAHOST1_ADDRESS       =  'soavh01'
 SOAHOST2_ADDRESS       =  'soavh02'
 
 JSSE_ENABLED     = true
-DEVELOPMENT_MODE = true
+DEVELOPMENT_MODE = false
 WEBTIER_ENABLED  = false
 
 ADMIN_USER     = 'weblogic'
@@ -16,7 +16,7 @@ ADMIN_PASSWORD = 'Welcome1'
 JAVA_HOME      = '/opt/jdk1.8.0_152'
 
 ADM_JAVA_ARGUMENTS = '-XX:PermSize=512m -XX:MaxPermSize=1024m -Xms1024m -Xmx2048m '
-WSM_JAVA_ARGUMENTS = '-XX:PermSize=128m -XX:MaxPermSize=512m  -Xms1512m -Xmx1024m '
+WSM_JAVA_ARGUMENTS = '-XX:PermSize=128m -XX:MaxPermSize=512m  -Xms512m  -Xmx1024m '
 OSB_JAVA_ARGUMENTS = '-XX:PermSize=512m -XX:MaxPermSize=1024m -Xms1024m -Xmx2048m '
 SOA_JAVA_ARGUMENTS = '-XX:PermSize=512m -XX:MaxPermSize=1024m -Xms1024m -Xmx2048m '
 BAM_JAVA_ARGUMENTS = '-XX:PermSize=512m -XX:MaxPermSize=1024m -Xms1024m -Xmx2048m '
@@ -83,6 +83,7 @@ def createMachine(machine_name, nodemanager_address):
   create(machine_name,'NodeManager')
   cd('NodeManager/'+machine_name)
   set('ListenAddress',nodemanager_address)
+  set('NMType','Plain')
 
 def assignServerToMachine(server_name, machine_name):  
   cd('/Servers/'+server_name)
@@ -146,7 +147,7 @@ createMachine('ADMINHOST', ADMINHOST_ADDRESS)
 createMachine('SOAHOST1', SOAHOST1_ADDRESS)
 createMachine('SOAHOST2', SOAHOST2_ADDRESS)
 
-print 'Create Machines'
+print 'Assign Servers to Machines'
 assignServerToMachine('AdminServer', 'ADMINHOST')
 assignServerToMachine('WLS_WSM1', 'SOAHOST1')
 assignServerToMachine('WLS_WSM2', 'SOAHOST2')
@@ -158,7 +159,7 @@ closeTemplate()
 # ----------------------------------------------------
 #createAdminStartupPropertiesFile(DOMAIN_PATH+'/servers/AdminServer/data/nodemanager',ADM_JAVA_ARGUMENTS)
 createBootPropertiesFile(DOMAIN_PATH+'/servers/AdminServer/security','boot.properties',ADMIN_USER,ADMIN_PASSWORD)
-createBootPropertiesFile(DOMAIN_PATH+'/servers/WLS_WSM1/security','boot.properties',ADMIN_USER,ADMIN_PASSWORD)
+#createBootPropertiesFile(DOMAIN_PATH+'/servers/WLS_WSM1/security','boot.properties',ADMIN_USER,ADMIN_PASSWORD)
 #createBootPropertiesFile(DOMAIN_PATH+'/config/nodemanager','nm_password.properties',ADMIN_USER,ADMIN_PASSWORD)
 
 #es = encrypt(ADMIN_PASSWORD,DOMAIN_PATH)
@@ -186,3 +187,8 @@ createBootPropertiesFile(DOMAIN_PATH+'/servers/WLS_WSM1/security','boot.properti
 
 #print('Exiting...')
 exit()
+
+#NEXT STETP: 
+#	NodeManager
+#	Comparar con el dominio generado por GUI
+
