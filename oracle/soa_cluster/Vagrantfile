@@ -31,6 +31,7 @@ Vagrant.configure("2") do |config|
   
   config.vm.define :services do |services|
 	services.vm.box = "bento/oracle-7.5"
+	services.vm.hostname = "services"
 	services.vm.network "private_network", auto_config: false
 	
 	services.vm.provision "ansible_local" do |ansible|
@@ -38,7 +39,8 @@ Vagrant.configure("2") do |config|
 	end
   end  
 
-  config.vm.synced_folder "E:/Download/Oracle/soa_bpm/12.2.1.3.0/vagrant_installers", "/mnt/12.2.1.3.0"
+  config.vm.synced_folder "E:/Download/Oracle/vagrant_installers", "/mnt/installers"
+  config.vm.synced_folder "D:/HashiCorp/00-vagrant_vms/my_vagrant_vms/oracle/cache", "/mnt/cache"
   config.vm.network "forwarded_port", guest: 22, host: 2222, id: "ssh", disabled: true
 
   config.ssh.forward_x11 = true  

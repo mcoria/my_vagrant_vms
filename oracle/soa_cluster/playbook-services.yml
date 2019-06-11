@@ -2,15 +2,22 @@
 - hosts: all
   become: true
   tasks:
-  
+
+  - name: Converting EOL files from DOS to UNIX
+    command: find /vagrant/scripts -name "*" -exec /usr/bin/dos2unix {} \;
+
+  - name: Updtaing /etc/yum.conf
+    copy: src=/vagrant/scripts/yum.conf dest=/etc/yum.conf mode="u=rw,g=r,o=r"    
+    
   #Este repo lo necesitamos para docker
   - name: Enabling Yum Repositories
     command: "yum-config-manager --enable ol7_addons"
     
   - name: Installing packages
     yum: 
-      state=installed name={{ item }}
-    with_items:
+      state=installed name={{ packages }}
+    vars:
+     packages:
       - yum-utils
       - lvm2
       - sysstat
@@ -22,9 +29,6 @@
       - samba-winbind
       - nfs-utils
       - docker-engine
-
-  - name: Converting EOL files from DOS to UNIX
-    command: find /vagrant/scripts -name "*" -exec /usr/bin/dos2unix {} \;
 
   - name: Adding vagrant to docker group
     user: name=vagrant groups=docker append=yes
@@ -53,9 +57,6 @@
     
   - name: Copying ifcfg-ens33
     copy: src=/vagrant/scripts/ifcfg-ens33-services dest=/etc/sysconfig/network-scripts/ifcfg-ens33 owner=root group=root mode=0644 remote_src=yes
-
-  - name: Setting hostname
-    hostname: name=services
 
   - name: Reloading network service
     systemd: name=network state=restarted    
