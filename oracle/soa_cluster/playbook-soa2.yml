@@ -6,8 +6,5 @@
   - name: Copying ifcfg-ens33
     copy: src=/vagrant/scripts/ifcfg-ens33-soa2 dest=/etc/sysconfig/network-scripts/ifcfg-ens33 owner=root group=root mode=0644 remote_src=yes
 
-  - name: Setting hostname
-    hostname: name=soavh02
-
   - name: Reloading network service
     systemd: name=network state=restarted
