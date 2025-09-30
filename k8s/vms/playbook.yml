@@ -1,0 +1,11 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+    
+  - name: Installing packages
+    apt: 
+      state=present name={{ packages }}
+    vars:
+     packages:
+      - dos2unix
