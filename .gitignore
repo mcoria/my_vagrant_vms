@@ -1,6 +1,6 @@
 debian-9.3-server/.vagrant/
-soa/soa_cluster/soa1/.vagrant/
-soa/soa_cluster/soa2/.vagrant/
-soa/soa_cluster/.vagrant/
+soa/vms/soa1/.vagrant/
+soa/vms/soa2/.vagrant/
+soa/vms/.vagrant/
 soa/cache/
 
