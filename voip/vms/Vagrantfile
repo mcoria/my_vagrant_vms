@@ -1,0 +1,34 @@
+Vagrant.configure("2") do |config|
+
+  config.vm.define :vm01 do |vm01|
+    vm01.vm.box = "bento/ubuntu-24.04"
+	vm01.vm.box_version = "202502.21.0"
+	vm01.vm.hostname = "vm01"
+
+	vm01.vm.provision "ansible_local" do |ansible|
+		ansible.playbook = "playbook.yml"
+	end
+  end
+  
+  config.vm.define :vm02 do |vm02|
+    vm02.vm.box = "bento/ubuntu-24.04"
+	vm02.vm.box_version = "202502.21.0"
+	vm02.vm.hostname = "vm02"
+
+	vm02.vm.provision "ansible_local" do |ansible|
+		ansible.playbook = "playbook.yml"
+	end
+  end  
+  
+  config.vm.define :vm03 do |vm03|
+    vm03.vm.box = "bento/ubuntu-24.04"
+	vm03.vm.box_version = "202502.21.0"
+	vm03.vm.hostname = "vm03"
+
+	vm03.vm.provision "ansible_local" do |ansible|
+		ansible.playbook = "playbook.yml"
+	end
+  end  
+  
+	
+end

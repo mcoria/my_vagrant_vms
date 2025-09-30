@@ -1,0 +1,25 @@
+# Iniciar las VMs mediante Vagrant
+PS> vagrant up
+PS> vagrant ssh vm01
+PS> vagrant ssh vm02
+PS> vagrant ssh vm03
+
+# Server
+$ dos2unix /vagrant/*.xml
+$ dos2unix /vagrant/users.txt
+
+# Comandos
+vm03:~$ sipp -sf /vagrant/uas-success.xml -i 192.168.32.130 -nd -trace_err -trace_rtt -trace_stat -fd 10 -lost 2
+vm02:~$ sipp -sf /vagrant/uas-480-vfr.xml -i 192.168.32.129 -nd -trace_err -trace_rtt -trace_stat -fd 10 -lost 2
+vm01:~$ sipp 192.168.32.10 -sf /vagrant/uac-success.xml -s 333543514201578 -nd -i 192.168.32.128 -m 50000 -l 1 -r 35 -inf /vagrant/users.txt -trace_err -trace_rtt -trace_stat -fd 10 -lost 2
+        
+
+sipp 192.168.32.10 -sf /vagrant/uac-success.xml -s 333543514201578 -nd -i 192.168.32.139 -m 50000 -l 200 -inf /vagrant/users.txt
+
+
+
+# Para filtrar una llamada: copiar a vms/logs
+$ cat VscSlave.out.log | grep '[ \\[]6-1606@192.168.32.138' > llamada6.txt
+
+
+
