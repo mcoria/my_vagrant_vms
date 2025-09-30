@@ -9,3 +9,9 @@
     vars:
      packages:
       - dos2unix
+
+  - name: Installing k8s
+    community.general.snap:
+      name: k8s 
+      classic: true
+      channel: 1.32-classic/stable
