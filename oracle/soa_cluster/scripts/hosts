@@ -1,7 +1,8 @@
 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
 
+192.168.40.10		webhost1 admin.example.com soainternal.example.com
 192.168.40.20		adminvh
-192.168.40.30		soavh01
-192.168.40.40		soavh02
-192.168.40.50		services
+192.168.40.30		soahost1
+192.168.40.40		soahost2
+192.168.40.50		services dbhost

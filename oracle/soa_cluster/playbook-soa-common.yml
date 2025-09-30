@@ -69,7 +69,7 @@
   - name: Copying .bashrc
     copy: src=/vagrant/scripts/.bashrc dest=/home/vagrant/.bashrc mode="u=rw,g=r,o=r"  
     
-  # Installing common infrastructure  
+  # Creating Oracle Inventory and Installing common infrastructure  
   - name: Creating Oracle Inventory
     command: /vagrant/scripts/createCentralInventory.sh
     args:
